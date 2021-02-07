@@ -1,10 +1,7 @@
 # Computational-Musicology
 Way more than 250 words, I am aware, but thought I'd get my thoughts on paper and feedback could help me determine what is important :)
 
-1. What is your corpus, why did you choose it, and what do you think is interesting about it? 
-
 My corpus consists of a playlist containing 80's new wave/ new romantic songs and a playlist containing trance classics from the early 90's to the mid 2010's. I was inspired by a statement made by BBC Radio 2, referring to Blue Monday (New Order's 1983 hit), as "a crucial link between Seventies disco and the dance/house boom that took off at the end of the Eighties." The repetative use of synths and heavy drum beats is a known characteristic of both new wave and trance music, and lead me to compare the two and see if any links could indeed be found.
-
 
 A heavy thumping beat alternating with a high-hat is present in both genres, and so I expect to find simularities in the percussion patterns used. Trance genrally ranges from 135-150 BPM, I expect to see a broader range in the 80's playlist with a lower lower bound as the music in the 80's tends to be slower. 
 Another important simularity I expect to be present is the heavy use of synths, though I think there are some obvious differences when it comes to the sound of these synths. With the rise of technology, synthesizers have improved and the 'punchy' synth sounds from the 80's have turned more towards more complex chord progressions of sweeping strings in trance music. I believe this will also be apparent in the valence and keys of the compared genres, with the dark and slightly eerie influences of the new-romantic style and the socially critical new-wave style compared to the euphoric feeling of trance music, with elements remeniscent of the more spiritual new age style. 
