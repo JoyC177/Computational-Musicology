@@ -138,7 +138,7 @@ The trace tracks are also louder than the Eighties ones with an average loudness
 
 Finally the amount of tracks in both major and minor keys seems to be about the same. I had expected more minor tracks in the trance playlist, but this was purely based on minor tracks being a common characteristic of trance music.
 
-### What do the 'happiest' tracks have in common?
+### A (rare) 'euphoric' trance track: peaks and vocals.
 ```{r}
 ernesto <-
   get_tidy_audio_analysis("0pMUR7Uvp6vxlbG0qBFvgM") %>%
@@ -170,7 +170,7 @@ The song is a typical example of the structure of a trance track, as it is compr
 
 The sequence on the synths (D#/E, F# and G#) repeats throughout the song and becomes louder when the vocals stop. At 120 sec there is a pure synth buildup to a 'peak' which ends around 150 seconds.
 
-### nother one
+
 ```{r include = FALSE}
 depechemode <-
   get_tidy_audio_analysis("6rvXznPVt21K7Adhw9zKEJ") %>%
