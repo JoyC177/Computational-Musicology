@@ -1,15 +1,20 @@
 ---
 title: '80''s vs Trance: An Analytical Comparison'
 author: "Joy Crosbie"
-date: "9-2-2021"
-output: html_document
+date: "Spring 2021"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
+    theme: lumen
+    orientation: rows
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## R Markdown
+
+### Introduction
 My corpus consists of a playlist containing 80's new wave/new romantic songs and a playlist containing trance classics from the early 90's to the mid 2010's. I was inspired by a statement made by BBC Radio 2, referring to Blue Monday (New Order's 1983 hit), as "a crucial link between Seventies disco and the dance/house boom that took off at the end of the Eighties." The repetative use of synths and heavy drum beats is a known characteristic of both new wave and trance music, and lead me to compare the two and see if any links could indeed be found.
 
 Although the synthesizer is common in both playlists, there are some obvious differences when it comes to the tones. The 'punchy' synth sounds from the 80's have become more complex chord progressions of sweeping strings in trance music. I believe this will also be apparent in the valence and keys of the compared genres, because of the dark influences of the new-romantic style and the socially critical new-wave style compared to the euphoric feeling of trance music. Interestingly, the number of female voices in the trance songs is significantly larger than the number of male voices, which is less apparent in the 80's genres. Moreover, the number of instrumental tracks is notably larger in the trance playlist. I am curious to see the difference in the 'energy' measured by spotify, as I believe both genres contain a high amount of energy, but the energy they contain is different, as described above.
@@ -19,61 +24,16 @@ Typical examples of interesting tracks from the 80's playlist would be Blue Mond
 New wave/romantic playlist: The 80's all lined up Trance: Old trance classics
 
 
-## Plots
 
 ```{r}
 library(tidyverse)
 library(spotifyr)
+library(plotly)
+library(compmus)
 ```
 ```{r}
-eighties <- get_playlist_audio_features("", "7E2Eignrw84V9pBzNoWpd9")
-eightiessummary <- eighties %>%
-  summarise(
-    mean_speechiness = mean(speechiness),
-    mean_acousticness = mean(acousticness),
-    mean_liveness = mean(liveness),
-    mean_danceability = mean(danceability),
-    mean_valence = mean(valence),
-    mean_energy = mean(energy),
-    mean_key = mean(key),
-    mean_loudness = mean(loudness),
-    mean(valence),
-    sd_speechiness = sd(speechiness),
-    sd_acousticness = sd(acousticness),
-    sd_liveness = sd(liveness),
-    median_speechiness = median(speechiness),
-    median_acousticness = median(acousticness),
-    median_liveness = median(liveness),
-    mad_speechiness = mad(speechiness),
-    mad_acousticness = mad(acousticness),
-    mad_liveness = mad(liveness)
-  )
-
-```
-
-```{r}
+eighties <- get_playlist_audio_features("", "7hIxxRmPxdpBa6zuDUC1FM")
 trance <- get_playlist_audio_features("", "3XKJmcxhdP8NXIoamf5zwc")
-trancesummary <- trance %>%
-  summarise(
-    mean_speechiness = mean(speechiness),
-    mean_acousticness = mean(acousticness),
-    mean_liveness = mean(liveness),
-    mean_danceability = mean(danceability),
-    mean_valence = mean(valence),
-    mean_energy = mean(energy),
-    mean_key = mean(key),
-    mean_loudness = mean(loudness),
-    mean(valence),
-    sd_speechiness = sd(speechiness),
-    sd_acousticness = sd(acousticness),
-    sd_liveness = sd(liveness),
-    median_speechiness = median(speechiness),
-    median_acousticness = median(acousticness),
-    median_liveness = median(liveness),
-    mad_speechiness = mad(speechiness),
-    mad_acousticness = mad(acousticness),
-    mad_liveness = mad(liveness)
-  )
 ```
 
 
@@ -85,9 +45,54 @@ playlists <-
   )
 ```
 
-
+### Club comeback: Which is more danceable, trance or 80's new romantics?
 ```{r}
-playlists %>%                    # Start with awards.
+dancetempo <- playlists %>%                    # Start with awards.
+  mutate(
+    mode = ifelse(mode == 0, "Minor", "Major")
+  ) %>%
+  ggplot(                     # Set up the plot.
+    aes(
+      x = tempo,
+      y = danceability,
+      name = track.name,
+      color = category
+    )
+  ) +
+  geom_point(show.legend = FALSE) + 
+  # Scatter plot.
+  geom_rug(size = 0.1) +      # Add 'fringes' to show data distribution. 
+  facet_wrap(~category) +     # Separate charts per playlist.
+  scale_x_continuous(         # Fine-tune the x axis.
+    limits = c(105, 170),
+    #breaks = c(0, 0.50, 1),   # Use grid-lines for quadrants only.
+    minor_breaks = NULL       # Remove 'minor' grid-lines.
+  ) +
+  scale_y_continuous(         # Fine-tune the y axis in the same way.
+    limits = c(0.3, 1),
+    breaks = c(0.5, 0.75, 1),
+    minor_breaks = NULL
+  ) +
+  scale_color_discrete(guide = 'none') +
+  theme_light() +             # Use a simpler theme.
+  labs(                       # Make the titles nice.
+    x = "Tempo(BPM)",
+    y = "Danceability"
+  )
+dancetempo <- dancetempo + theme(legend.position = "none")
+
+ggplotly(dancetempo)
+```
+
+***
+An immediate first observation is that the trance tracks range over a much smaller BPM interval.This was expected, as the genre is characterized by a tempo lying between 135-150 BPM. 
+
+The majority of the tracks in both genres seem to lie between the 0.5-0.75 danceability interval. Worth noting however, is the amount of trance tracks with a 'low' danceability under 0.5 (including well-known crowd favourite Shivers-Armin van Buuren!). These specific tracks also range across the common trance BPM interval, so tempo is not the issue....
+
+
+### Is trance music really happier than the Eighties new romantic music?
+```{r}
+scatter_feeling <- playlists %>%                    # Start with awards.
   mutate(
     mode = ifelse(mode == 0, "Minor", "Major")
   ) %>%
@@ -96,10 +101,12 @@ playlists %>%                    # Start with awards.
       x = valence,
       y = energy,
       size = loudness,
-      colour = mode
+      colour = mode,
+      name = track.name
     )
   ) +
-  geom_jitter(alpha = 0.45, width = 0.1) +
+  geom_point(alpha = 0.45, width = 0.1) +
+  #geom_jitter(alpha = 0.45, width = 0.1) +
   facet_wrap(~ category) +
    scale_x_continuous(         # Fine-tune the x axis.
     limits = c(0, 1),
@@ -121,8 +128,73 @@ playlists %>%                    # Start with awards.
     y = "Energy",
     colour = "Mode"
   )
+ggplotly(scatter_feeling)
+```
+
+***
+As shown in the plot above, both the Eighties and the trance tracks contain a high amount of energy. Surprisingly, the trance tracks generally emit a lower range of valence. High energy and low valence would indicate that trance music would be classified as angry. This is in contrast to the euphoric or slightly sad feeling the heavy synths are generally described to have. Mostly high energy and high valence means the Eighties tracks would generally be perceived to be happy, though there are some in both the sad and angry region. 
+
+The trace tracks are also louder than the Eighties ones with an average loudness of -9.9 compared to -8. 
+
+Finally the amount of tracks in both major and minor keys seems to be about the same. I had expected more minor tracks in the trance playlist, but this was purely based on minor tracks being a common characteristic of trance music.
+
+### What do the 'happiest' tracks have in common?
+```{r}
+ernesto <-
+  get_tidy_audio_analysis("0pMUR7Uvp6vxlbG0qBFvgM") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+
+ernesto %>%
+  mutate(pitches = map(pitches, compmus_normalise, "manhattan")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Dark Side Of The Moon - Ernesto vs. Bastian") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
+
+***
+[Dark Side Of The Moon by Ernesto vs. Bastian](https://open.spotify.com/track/05lLA8ljMPozdEtFycI52o?si=_t7JeD6QQAK5jIO3w0vMsw) seems to stand out from the majority of 'angry' dance tracks and contains the highest valence in the trance dataset. Here the corresponding chromagram is shown. 
+
+The song is a typical example of the structure of a trance track, as it is comprised of sections that distinctly build tension to either end in "peaks" or "drops". Here those sections can clearly be seen by the absence of the vocals which mostly make up B and C. 
+
+The sequence on the synths (D#/E, F# and G#) repeats throughout the song and becomes louder when the vocals stop. At 120 sec there is a pure synth buildup to a 'peak' which ends around 150 seconds.
+
+### nother one
+```{r include = FALSE}
+depechemode <-
+  get_tidy_audio_analysis("6rvXznPVt21K7Adhw9zKEJ") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+
+depechemode %>%
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "FTG") +
+  theme_minimal() +
+  scale_fill_viridis_c()
 ```
 
 
-As shown in the plot above, both the Eighties and the trance tracks contain a high amount of energy. Surprisingly, the trance tracks generally emit a lower range of valence. High energy and low valence would indicate that trance music would be classified as angry. This is in contrast to the euphoric or slightly sad feeling the heavy synths are generally described to have. Mostly high energy and high valence means the Eighties tracks would generally be perceived to be happy, though there are some in both the sad and angry region. The trace tracks are also louder than the Eighties ones with an average loudness of -9.9 compared to -8. 
-**I want to add outlier/notable track names, is this a good idea? And how can I do it and keep the plot looking tidy? The trance tracks are pretty clustered and doesn't leave me a lot of room.** 
+
+
