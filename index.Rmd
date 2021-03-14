@@ -11,6 +11,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(cache = TRUE)
 ```
 ```{r}
 library(tidyverse)
@@ -86,6 +87,55 @@ playlists <- playlists %>%
   mutate(Key = if_else(mode == 0, paste(key, 'm', sep = ""), key))
 ```
 
+### Trance (not very danceable) dance music? 
+```{r}
+sunrise <- get_tidy_audio_analysis("3dnGed4dwCkO2AoQVnbScw")
+```
+
+```{r}
+sunrise%>%
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) %>%
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+```
+
+
+### The most danceable trance track: A closer look at the tempo
+
+```{r}
+doom <- get_tidy_audio_analysis("12GwtT1n24TIpp2RER56Ij")
+```
+
+```{r}
+doom %>%
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) %>%
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+```
+
+
+### The most danceable New Romantics track: A closer look at the tempo
+
+```{r}
+electricavenue <- get_tidy_audio_analysis("10kYRZ5byZgBEcmmQizlzj")
+```
+
+```{r}
+electricavenue %>%
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) %>%
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+```
+
 ### Possible explanation for the angry trance tracks? - A comparison of musical keys for New Romantic and Trance tracks
 
 ```{r}
@@ -99,7 +149,6 @@ ggplot(playlists1, aes(x = Key, fill = category)) +
 ```
 
 ***
-Wondering if this plot is too difficult to grasp quickly? Could it be better to do a top 10 keys per category chart (then I lose the ability to compare each key)? Also this section is very long, so I will probably move the conclusion to a separate conclusion tab.
 
 **New Romantic analysis**
 
@@ -178,7 +227,7 @@ ggplotly(dancetempo)
 ***
 An immediate first observation is that the trance tracks range over a much smaller BPM interval.This was expected, as the genre is characterized by a tempo lying between 135-150 BPM. 
 
-The majority of the tracks in both genres seem to lie between the 0.5-0.75 danceability interval. Worth noting however, is the amount of trance tracks with a 'low' danceability under 0.5 (including well-known crowd favourite Shivers-Armin van Buuren!). These specific tracks also range across the common trance BPM interval, so tempo is not the issue....
+The majority of the tracks in both genres seem to lie between the 0.5-0.75 danceability interval. Worth noting however, is the amount of trance tracks with a 'low' danceability under 0.5. 
 
 
 ### Is trance music really happier than the 80's New Romantic music?
@@ -230,7 +279,7 @@ The trace tracks are also louder than the New Romantic ones with an average loud
 
 Finally the amount of tracks in both major and minor keys seems to be about the same. I had expected more minor tracks in the trance playlist, but this was purely based on minor tracks being a common characteristic of trance music.
 
-### A (rare) 'euphoric' trance track: peaks and vocals.
+### A (rare) 'euphoric' trance track: Peaks and vocals.
 ```{r}
 ernesto <-
   get_tidy_audio_analysis("0pMUR7Uvp6vxlbG0qBFvgM") %>%
@@ -287,7 +336,7 @@ depechemode %>%
   scale_fill_viridis_c()
 ```
 
-### Chroma and timbre in 80's New Romantic pop: a typical example
+### Chroma and timbre in 80's New Romantic pop: A typical example
 
 ```{r}
 duel <-
@@ -342,7 +391,7 @@ bind_rows(
 
 An important observation with this track is that the chroma plot and the timbre plot seem to show the same similarity pattern. This is because Both plots show the distinctive sections and their repetitions, as there is no variation between the different verses. The bridge is particularly interesting here, as the timbre is different to the other sections of the song. The song suddenly slows down and the melody changes for about ten seconds, to then instrumentally build up to the chorus. 
 
-### Chroma and timbre in 90's trance: a typical example
+### Chroma and timbre in 90's trance: A typical example
 
 ```{r}
 children <-
