@@ -87,7 +87,7 @@ playlists <- playlists %>%
   mutate(Key = if_else(mode == 0, paste(key, 'm', sep = ""), key))
 ```
 
-### Trance (not very danceable) dance music? 
+### Trance: not very danceable dance music? 
 ```{r}
 sunrise <- get_tidy_audio_analysis("3dnGed4dwCkO2AoQVnbScw")
 ```
@@ -97,11 +97,17 @@ sunrise%>%
   tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) %>%
   ggplot(aes(x = time, y = bpm, fill = power)) +
   geom_raster() +
+  ggtitle('Tempogram of Sunrise - Ratty') +
   scale_fill_viridis_c(guide = "none") +
   labs(x = "Time (s)", y = "Tempo (BPM)") +
-  theme_classic()
+  theme_classic() 
 ```
 
+*** 
+**This comes after the danceability/tempo plot** 
+As shown in the previous plot, quite a few of the trance tracks have been assigned a low danceability value. A common characteristic of trance music is a mid-song climax followed by a soft breakdown disposing of beats and percussion entirely, leaving the melody or atmospherics to stand alone for an extended period before gradually building up again. 
+
+In [Sunrise (Radio-Edit) - Ratty](https://open.spotify.com/track/3dnGed4dwCkO2AoQVnbScw?si=F6ZgC9z6TbW757Am-VSEdw) these breakdown sections consist of female vocals in a style reminiscent of an elegy, with soft synths playing in the background. The lack of percussion causes the Spotify API to have trouble determining the tempo, as can be seen between 55 and 105 seconds and again after 200 seconds. This is presumably on of the reasons of the low danceability score (0.46), as danceable songs are presumed to have a relatively stable rhythm. Other songs with a low danceability score such as [Communication](https://open.spotify.com/track/0W0tn4jpmnwnPZxO8nyhS7?si=i_NuEaQgTuWn4In4kTvNHQ) and [Shivers](https://open.spotify.com/track/0pfJH3eRkM4t9wlg6LwuTU?si=DoPEjtEMRTqm588RWUNMjQ) also contain acapella breakdowns.
 
 ### The most danceable trance track: A closer look at the tempo
 
@@ -114,11 +120,15 @@ doom %>%
   tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) %>%
   ggplot(aes(x = time, y = bpm, fill = power)) +
   geom_raster() +
+  ggtitle('Tempogram of Dooms Night (Timo Maas Radio Edit) - Azzido Da Bass') +
   scale_fill_viridis_c(guide = "none") +
   labs(x = "Time (s)", y = "Tempo (BPM)") +
   theme_classic()
 ```
 
+***
+
+[Dooms Night - Timo Maas Radio Edit by Azzido Da Bass](https://open.spotify.com/track/12GwtT1n24TIpp2RER56Ij?si=7IeAZT3NRnCWKbxQBlYwNQ) received the highest danceability score of 0.91. This tempogram is quite interesting. Once again the characteristic sections of trance music are visible. The song starts off with just percussion at 135BPM. At 30 seconds the intro ends and the percussion stops and the brakdown starts, a synthesizer makes a 'womping' noise that speeds up slightly to 90 BPM. At 50 seconds the percussion joins the synth and takes the tempo back up to 135 BPM up until 95 seconds. This is where it gets interesting: again the percussion stops and the "womping" synth starts off slowly and then builds up to 300BPM. The first half of the song is then repeated again. **I presume the 300 BPM isn't shown because it is wrapped and in the graph it becomes the second sloped line. How do I solve this? Or can I just leave it like this if I just explain it @Tosca?**
 
 ### The most danceable New Romantics track: A closer look at the tempo
 
@@ -131,43 +141,16 @@ electricavenue %>%
   tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) %>%
   ggplot(aes(x = time, y = bpm, fill = power)) +
   geom_raster() +
+  ggtitle('Tempogram of Electric Avenue - Eddy Grant') +
   scale_fill_viridis_c(guide = "none") +
   labs(x = "Time (s)", y = "Tempo (BPM)") +
   theme_classic()
 ```
 
-### Possible explanation for the angry trance tracks? - A comparison of musical keys for New Romantic and Trance tracks
-
-```{r}
-playlists1 <- playlists
-playlists1$Key <- factor(playlists1$Key, levels = c("A", "Am", "A#", "A#m", "B", "Bm","C", "Cm", "C#", "C#m", "D", "Dm", "D#", "D#m", "E", "Em", "F", "Fm", "F#", "F#m", "G", "Gm", "G#", "G#m"))
-ggplot(playlists1, aes(x = Key, fill = category)) + 
-  geom_bar(position = 'dodge') +
-  ggtitle('Keys of New Romantic and Trance tracks') +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
 ***
 
-**New Romantic analysis**
+[Electric Avenue - Eddy Grant](https://open.spotify.com/track/10kYRZ5byZgBEcmmQizlzj?si=egL6bvrHS3CO1nc6s2HGkQ) received a very high danceability score of 0.95. The structure of this song is very different to the trance tracks, as it doesn't consist of sections with a different tempo (this is true for most of the New Romantic tracks). In fact, the song is very repetitive with the same drums, synth melody and bass riff playing throughout the entire track. The whole song has a BPM around 121 BPM.
 
-On the left a bar chart of the keys of the tracks for both genres is shown. The first clear observation is the large amount of New Romantic tracks in the key of C major. This key is associated with a feeling of almost childlike innocence and simplicity. A typical example in this category would be [Just can't get enough by Depeche mode](https://open.spotify.com/track/0qi4b1l0eT3jpzeNHeFXDT?si=dbmWtCbgR2ejrj9GVcLTOg), because of it's cheerful and imaginative synth melodies. 
-
-Both A and A# also contain a relatively high amount of New Romantic tracks. A is perceived as joyful and gives the sense of an declaration of love. An example in this key would be [Just Like Heaven by The Cure](https://open.spotify.com/track/4NnWuGQujzWUEg0uZokO5M?si=3jG8sicxRBWgrLNZkPIZXg), for it's youthful cheerfulness. A# is closely related with a more optimistic and future orientated feeling. 
-
-Finally, F only seems to contain New Romantic tracks. This key is said to give off a sense of deep anger that is controlled, or a sense of regret. [Regret by New Order](https://open.spotify.com/track/1UVll7jjUlqSGxCZ6uXVaD?si=-HhVlCL5SXmgWEiBlL67xA) (how fitting) is an  example of a track in F. 
-
-**Trance analysis**
-
-The first clear observation is the large amount of trance tracks in the key of G#. This key is perceived as a sense of death, eternity and judgment. At first the large amount of tracks seemed strange to me, but I believe this key gives off the haunting feeling that many trance tracks have. I read that this key could be described as "Expansive viewpoints of a dark cosmos and existence" and I feel this is indeed so. [Universal Nation by Push](https://open.spotify.com/track/34PgbZHudjUapNEqsb1WcW?si=xwvX8fEtQnOQtKywH00NRA) is a song in G# that really feels like a trip through the emptiness and eternity of space.
-
-This trend of negative feelings continues in the large amount of songs in the keys of Gm, C# and A#m. All keys have a sense of discontent, ranging from uneasiness in Gm, to a sense of grief and depression in C# to simply 'terrible' and giving up in A#m. 
-
-However the relatively high songs in G contain a feeling of fantasy and peace, which is more what I expected to find. As the rush comes - Motorcycle contains a lot of dreamy background choir vocals and emits a strong feeling of peace. The tender and graceful key of Am also contains quite a few songs, such as [9pm (Till I come) - ATB](https://open.spotify.com/track/1CgbwsrNDlFrRuk2ebQ7zr?si=crFultzrRQSjVb0_2CNt3Q).
-
-**Conclusion** 
-Looking through the tracks in each key, the characteristics of each key seem to clearly be reflected in the general feel of the track. A large amount of the trance tracks are in a key that is associated with negative emotions. These negative emotions, combined with the high amount of energy appears to be a plausible explanation for the large amount of tracks classified as "angry". Interestingly, the spread of the tracks in the "overall emotions" plot seems to be reflected in the key plot.
 
 
 ### Introduction
@@ -311,6 +294,38 @@ The song is a typical example of the structure of a trance track, as it is compr
 
 The sequence on the synths (D#/E, F# and G#) repeats throughout the song and becomes louder when the vocals stop. At 120 sec there is a pure synth buildup to a 'peak' which ends around 150 seconds.
 
+### Possible explanation for the angry trance tracks? - A comparison of musical keys for New Romantic and Trance tracks
+
+```{r}
+playlists1 <- playlists
+playlists1$Key <- factor(playlists1$Key, levels = c("A", "Am", "A#", "A#m", "B", "Bm","C", "Cm", "C#", "C#m", "D", "Dm", "D#", "D#m", "E", "Em", "F", "Fm", "F#", "F#m", "G", "Gm", "G#", "G#m"))
+ggplot(playlists1, aes(x = Key, fill = category)) + 
+  geom_bar(position = 'dodge') +
+  ggtitle('Keys of New Romantic and Trance tracks') +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+***
+
+**New Romantic analysis**
+
+On the left a bar chart of the keys of the tracks for both genres is shown. The first clear observation is the large amount of New Romantic tracks in the key of C major. This key is associated with a feeling of almost childlike innocence and simplicity. A typical example in this category would be [Just can't get enough by Depeche mode](https://open.spotify.com/track/0qi4b1l0eT3jpzeNHeFXDT?si=dbmWtCbgR2ejrj9GVcLTOg), because of it's cheerful and imaginative synth melodies. 
+
+Both A and A# also contain a relatively high amount of New Romantic tracks. A is perceived as joyful and gives the sense of an declaration of love. An example in this key would be [Just Like Heaven by The Cure](https://open.spotify.com/track/4NnWuGQujzWUEg0uZokO5M?si=3jG8sicxRBWgrLNZkPIZXg), for it's youthful cheerfulness. A# is closely related with a more optimistic and future orientated feeling. 
+
+Finally, F only seems to contain New Romantic tracks. This key is said to give off a sense of deep anger that is controlled, or a sense of regret. [Regret by New Order](https://open.spotify.com/track/1UVll7jjUlqSGxCZ6uXVaD?si=-HhVlCL5SXmgWEiBlL67xA) (how fitting) is an  example of a track in F. 
+
+**Trance analysis**
+
+The first clear observation is the large amount of trance tracks in the key of G#. This key is perceived as a sense of death, eternity and judgment. At first the large amount of tracks seemed strange to me, but I believe this key gives off the haunting feeling that many trance tracks have. I read that this key could be described as "Expansive viewpoints of a dark cosmos and existence" and I feel this is indeed so. [Universal Nation by Push](https://open.spotify.com/track/34PgbZHudjUapNEqsb1WcW?si=xwvX8fEtQnOQtKywH00NRA) is a song in G# that really feels like a trip through the emptiness and eternity of space.
+
+This trend of negative feelings continues in the large amount of songs in the keys of Gm, C# and A#m. All keys have a sense of discontent, ranging from uneasiness in Gm, to a sense of grief and depression in C# to simply 'terrible' and giving up in A#m. 
+
+However the relatively high songs in G contain a feeling of fantasy and peace, which is more what I expected to find. As the rush comes - Motorcycle contains a lot of dreamy background choir vocals and emits a strong feeling of peace. The tender and graceful key of Am also contains quite a few songs, such as [9pm (Till I come) - ATB](https://open.spotify.com/track/1CgbwsrNDlFrRuk2ebQ7zr?si=crFultzrRQSjVb0_2CNt3Q).
+
+**Conclusion** 
+Looking through the tracks in each key, the characteristics of each key seem to clearly be reflected in the general feel of the track. A large amount of the trance tracks are in a key that is associated with negative emotions. These negative emotions, combined with the high amount of energy appears to be a plausible explanation for the large amount of tracks classified as "angry". Interestingly, the spread of the tracks in the "overall emotions" plot seems to be reflected in the key plot.
 
 ```{r include = FALSE}
 depechemode <-
