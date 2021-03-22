@@ -7,85 +7,304 @@ output:
     storyboard: true
     theme: lumen
     orientation: rows
+    vertical_layout: fill
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-knitr::opts_chunk$set(cache = TRUE)
-```
-```{r}
+
 library(tidyverse)
+library(tidymodels)
+library(ggdendro)
+library(heatmaply)
 library(spotifyr)
 library(plotly)
+library(kableExtra)
 library(compmus)
-```
-```{r}
+library(patchwork)
+
+get_conf_mat <- function(fit) {
+  outcome <- .get_tune_outcome_names(fit)
+  fit %>% 
+    collect_predictions() %>% 
+    conf_mat(truth = outcome, estimate = .pred_class)
+}  
+
+get_pr <- function(fit) {
+  fit %>% 
+    conf_mat_resampled() %>% 
+    group_by(Prediction) %>% mutate(precision = Freq / sum(Freq)) %>% 
+    group_by(Truth) %>% mutate(recall = Freq / sum(Freq)) %>% 
+    ungroup() %>% filter(Prediction == Truth) %>% 
+    select(class = Prediction, precision, recall)
+}  
+
 eighties <- get_playlist_audio_features("", "7hIxxRmPxdpBa6zuDUC1FM")
 trance <- get_playlist_audio_features("", "3XKJmcxhdP8NXIoamf5zwc")
 ```
 
-```{r}
-eightiessum <- eighties %>%
-  summarise(
-    mean_speechiness = mean(speechiness),
-    mean_acousticness = mean(acousticness),
-    mean_liveness = mean(liveness),
-    mean_danceability = mean(danceability),
-    sd_speechiness = sd(speechiness),
-    sd_acousticness = sd(acousticness),
-    sd_liveness = sd(liveness),
-    median_speechiness = median(speechiness),
-    median_acousticness = median(acousticness),
-    median_liveness = median(liveness),
-    mad_speechiness = mad(speechiness),
-    mad_acousticness = mad(acousticness),
-    mad_liveness = mad(liveness)
-  )
 
-trancesum <- trance %>%
-  summarise(
-    mean_speechiness = mean(speechiness),
-    mean_acousticness = mean(acousticness),
-    mean_liveness = mean(liveness),
-    mean_danceability = mean(danceability),
-    sd_speechiness = sd(speechiness),
-    sd_acousticness = sd(acousticness),
-    sd_liveness = sd(liveness),
-    median_speechiness = median(speechiness),
-    median_acousticness = median(acousticness),
-    median_liveness = median(liveness),
-    mad_speechiness = mad(speechiness),
-    mad_acousticness = mad(acousticness),
-    mad_liveness = mad(liveness)
-  )
-```
-
-
-```{r}
+```{r create playlists}
 playlists <-
   bind_rows(
-    eighties %>% mutate(category = "New Romantic"),
-    trance %>% mutate(category = "Trance")
+    eighties %>% mutate(playlist = "New Romantic"),
+    trance %>% mutate(playlist = "Trance")
+  )
+```
+
+
+
+
+### Classification
+
+```{r create features(slow!)}
+
+  playlists_features <-
+  playlists %>%  # For your portfolio, change this to the name of your corpus.
+  add_audio_analysis() %>% 
+  mutate(
+    playlist = factor(playlist),
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(
+        segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean",
+      )
+  ) %>%
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) %>%
+  mutate_at(vars(pitches, timbre), map, bind_rows) %>%
+  unnest(cols = c(pitches, timbre))
+```
+
+```{r}
+playlists_recipe <-
+  recipe(
+    playlist ~
+      danceability +
+      energy +
+      loudness +
+      speechiness +
+      acousticness +
+      instrumentalness +
+      liveness +
+      valence +
+      tempo +
+      C + `C#|Db` + D + `D#|Eb` +
+      E + `F` + `F#|Gb` + G +
+      `G#|Ab` + A + `A#|Bb` + B +
+      c01 + c02 + c03 + c04 + c05 + c06 +
+      c07 + c08 + c09 + c10 + c11 + c12,
+    data = playlists_features,          # Use the same name as the previous block.
+  ) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors())      # Converts to z-scores.
+  # step_range(all_predictors())    # Sets range to [0, 1].
+
+playlists_cv <- playlists_features %>% vfold_cv(5)
+```
+
+```{r}
+forest_model <-
+  rand_forest() %>%
+  set_mode("classification") %>% 
+  set_engine("ranger", importance = "impurity")
+playlists_forest <- 
+  workflow() %>% 
+  add_recipe(playlists_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit_resamples(
+    playlists_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+```
+```{r}
+forest_pr <- playlists_forest %>% get_pr()
+#playlists_forest %>% get_conf_mat() %>% autoplot(type = "heatmap")
+```
+
+```{r eval=FALSE}
+workflow() %>% 
+  add_recipe(playlists_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit(playlists_features) %>% 
+  pluck("fit", "fit", "fit") %>%
+  ranger::importance() %>% 
+  enframe() %>% 
+  mutate(name = fct_reorder(name, value)) %>% 
+  ggplot(aes(name, value)) + 
+  geom_col() + 
+  coord_flip() +
+  theme_minimal() +
+  labs(x = NULL, y = "Importance")
+
+```
+
+```{r}
+playlists_recipe_reduced <-
+  recipe(
+    playlist ~
+      instrumentalness +
+      valence +
+      tempo +
+      c03 + c06,
+    data = playlists_features,          # Use the same name as the previous block.
+  ) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors())      # Converts to z-scores.
+  # step_range(all_predictors())    # Sets range to [0, 1].
+playlists_forest_reduced <- 
+  workflow() %>% 
+  add_recipe(playlists_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit_resamples(
+    playlists_cv, 
+    control = control_resamples(save_pred = TRUE)
   )
 ```
 
 ```{r}
-playlists$key[playlists$key == "0"] <- "C"
-playlists$key[playlists$key == "1"] <- "C#"
-playlists$key[playlists$key == "2"] <- "D"
-playlists$key[playlists$key == "3"] <- "D#"
-playlists$key[playlists$key == "4"] <- "E"
-playlists$key[playlists$key == "5"] <- "F"
-playlists$key[playlists$key == "6"] <- "F#"
-playlists$key[playlists$key == "7"] <- "G"
-playlists$key[playlists$key == "8"] <- "G#"
-playlists$key[playlists$key == "9"] <- "A"
-playlists$key[playlists$key == "10"] <- "A#"
-playlists$key[playlists$key == "11"] <- "B"
-
-playlists <- playlists %>%
-  mutate(Key = if_else(mode == 0, paste(key, 'm', sep = ""), key))
+forest_reduced_pr <- playlists_forest_reduced %>% get_pr()
+#playlists_forest_reduced %>% get_conf_mat() %>% autoplot(type = "heatmap")
 ```
+
+
+
+```{r}
+decision <- playlists_features %>%
+  ggplot(aes(x = c06, y = valence, colour = playlist, size = valence)) +
+  geom_point(alpha = 0.8) +
+  scale_color_viridis_d() +
+  labs(
+    x = "c06",
+    y = "Tempo",
+    size = "Valence",
+    colour = "Playlist"
+  )
+
+```
+
+```{r}
+svm_model <-
+  svm_rbf() %>% 
+  set_engine("kernlab") %>% 
+  set_mode("classification")
+playlists_svm <- 
+  workflow() %>% 
+  add_recipe(playlists_recipe_reduced) %>% 
+  add_model(svm_model) %>% 
+  fit_resamples(
+    playlists_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+  
+```
+
+```{r}
+
+svm_pr <- playlists_svm %>% get_pr()
+confusematrix <- playlists_svm %>% get_conf_mat() %>% autoplot(type = "heatmap")
+
+decision + confusematrix
+```
+
+***
+The first classifier I tried when trying to distinguish between the trance and New Romantic tracks was a random forest classifier. This classifier already performs well, as shown in the following table: 
+```{r}
+forest_pr %>%
+  kbl() %>%
+  kable_styling()
+```
+Using a random-forest classifier, the most important features for classifying tracks among these playlists are (ranked from most to least important):
+1. Timbre Component 6
+2. Valence
+3. Timbre Component 3
+4. Tempo
+5. Instrumentalness
+After these five features, there is a substantial drop in importance. The results of the random forest classifier with just these five features are shown below:
+
+```{r}
+forest_reduced_pr %>%
+  kbl() %>%
+  kable_styling()
+```
+
+The classifier achieves a higher precision and recall for both genres when only the top 5 most important features are used.
+
+When plotting the two most important features, a clear non linear decision boundary can be observed. This lead me to try a Support Vector Machine (SVM), in the hopes to be able to capture the corresponding decision regions. The SVM results are shown below:
+
+```{r}
+svm_pr %>%
+  kbl() %>%
+  kable_styling()
+```
+While the precision stays the same, the recall goes up by 3/4% . Although it follows from the scores that a few trance tracks were thought to be New Romantic tracks, the SVM does a very good job at distinguishing between the two.
+
+
+### Introduction
+My corpus consists of a playlist containing 80's New Romantic songs and a playlist containing trance classics from the early 90's to the mid 2010's. I was inspired by a statement made by BBC Radio 2, referring to Blue Monday (New Order's 1983 hit), as "a crucial link between Seventies disco and the dance/house boom that took off at the end of the New Romantic." The repetitive use of synths and heavy drum beats is a known characteristic of both new wave and trance music, and lead me to compare the two and see if any links could indeed be found.
+
+Although the synthesizer is common in both playlists, there are some obvious differences when it comes to the tones. The 'punchy' synth sounds from the 80's have become more complex chord progressions of sweeping strings in trance music. I believe this will also be apparent in the valence and keys of the compared genres, because of the dark and "poppy" influences of the new-romantic style compared to the euphoric feeling of trance music. Interestingly, the number of female voices in the trance songs is significantly larger than the number of male voices, which is less apparent in the 80's genres. Moreover, the number of instrumental tracks is notably larger in the trance playlist. I am curious to see the difference in the 'energy' measured by spotify, as I believe both genres contain a high amount of energy, but the energy they contain is different, as described above.
+
+Typical examples of interesting tracks from the 80's playlist would be Blue Monday - New Order and Fade To Grey - Visage. Both tracks contain a basic chord progression in a minor key played on a synthesizer repeated throughout the song, accompanied by a similar drum and high hat beat. Typical examples of interesting tracks from the trance playlist would be Adagio for Strings - Tiësto and Carte Blanche - Veracocha. Both songs contain well known riffs and are comprised of a musical form that distinctly builds tension to either end in "peaks" or "drops". Both songs are also in minor keys, a common characteristic of trance music.
+
+
+[New Romantic Playlist](https://open.spotify.com/playlist/7hIxxRmPxdpBa6zuDUC1FM?si=TxVg34i0TZSDGWSvYl7_Tg)
+
+[Trance Playlist](https://open.spotify.com/playlist/3XKJmcxhdP8NXIoamf5zwc?si=svUOmdo4RRy29MBrfyWc6A)
+
+### Club comeback: Which is more danceable, Trance or 80's New Romantics?
+```{r}
+dancetempo <- playlists %>%                    # Start with awards.
+  mutate(
+    mode = ifelse(mode == 0, "Minor", "Major")
+  ) %>%
+  ggplot(                     # Set up the plot.
+    aes(
+      x = tempo,
+      y = danceability,
+      name = track.name,
+      color = playlist
+    )
+  ) +
+  geom_point(show.legend = FALSE) + 
+  # Scatter plot.
+  geom_rug(size = 0.1) +      # Add 'fringes' to show data distribution. 
+  facet_wrap(~playlist) +     # Separate charts per playlist.
+  scale_x_continuous(         # Fine-tune the x axis.
+    limits = c(105, 170),
+    #breaks = c(0, 0.50, 1),   # Use grid-lines for quadrants only.
+    minor_breaks = NULL       # Remove 'minor' grid-lines.
+  ) +
+  scale_y_continuous(         # Fine-tune the y axis in the same way.
+    limits = c(0.3, 1),
+    breaks = c(0.5, 0.75, 1),
+    minor_breaks = NULL
+  ) +
+  scale_color_discrete(guide = 'none') +
+  theme_light() +             # Use a simpler theme.
+  labs(                       # Make the titles nice.
+    x = "Tempo(BPM)",
+    y = "Danceability"
+  ) +
+  ggtitle('Danceability: New Romantic vs. Trance') +
+  theme(plot.title = element_text(hjust = 0.5))
+
+dancetempo <- dancetempo + theme(legend.position = "none")
+
+ggplotly(dancetempo)
+```
+
+***
+An immediate first observation is that the trance tracks range over a much smaller BPM interval.This was expected, as the genre is characterized by a tempo lying between 135-150 BPM. 
+
+The majority of the tracks in both genres seem to lie between the 0.5-0.75 danceability interval. Worth noting however, is the amount of trance tracks with a 'low' danceability under 0.5. 
 
 ### Trance: not very danceable dance music? 
 ```{r}
@@ -151,68 +370,6 @@ electricavenue %>%
 
 [Electric Avenue - Eddy Grant](https://open.spotify.com/track/10kYRZ5byZgBEcmmQizlzj?si=egL6bvrHS3CO1nc6s2HGkQ) received a very high danceability score of 0.95. The structure of this song is very different to the trance tracks, as it doesn't consist of sections with a different tempo (this is true for most of the New Romantic tracks). In fact, the song is very repetitive with the same drums, synth melody and bass riff playing throughout the entire track. The whole song has a BPM around 121 BPM.
 
-
-
-### Introduction
-My corpus consists of a playlist containing 80's New Romantic songs and a playlist containing trance classics from the early 90's to the mid 2010's. I was inspired by a statement made by BBC Radio 2, referring to Blue Monday (New Order's 1983 hit), as "a crucial link between Seventies disco and the dance/house boom that took off at the end of the New Romantic." The repetitive use of synths and heavy drum beats is a known characteristic of both new wave and trance music, and lead me to compare the two and see if any links could indeed be found.
-
-Although the synthesizer is common in both playlists, there are some obvious differences when it comes to the tones. The 'punchy' synth sounds from the 80's have become more complex chord progressions of sweeping strings in trance music. I believe this will also be apparent in the valence and keys of the compared genres, because of the dark and "poppy" influences of the new-romantic style compared to the euphoric feeling of trance music. Interestingly, the number of female voices in the trance songs is significantly larger than the number of male voices, which is less apparent in the 80's genres. Moreover, the number of instrumental tracks is notably larger in the trance playlist. I am curious to see the difference in the 'energy' measured by spotify, as I believe both genres contain a high amount of energy, but the energy they contain is different, as described above.
-
-Typical examples of interesting tracks from the 80's playlist would be Blue Monday - New Order and Fade To Grey - Visage. Both tracks contain a basic chord progression in a minor key played on a synthesizer repeated throughout the song, accompanied by a similar drum and high hat beat. Typical examples of interesting tracks from the trance playlist would be Adagio for Strings - Tiësto and Carte Blanche - Veracocha. Both songs contain well known riffs and are comprised of a musical form that distinctly builds tension to either end in "peaks" or "drops". Both songs are also in minor keys, a common characteristic of trance music.
-
-
-[New Romantic Playlist](https://open.spotify.com/playlist/7hIxxRmPxdpBa6zuDUC1FM?si=TxVg34i0TZSDGWSvYl7_Tg)
-
-[Trance Playlist](https://open.spotify.com/playlist/3XKJmcxhdP8NXIoamf5zwc?si=svUOmdo4RRy29MBrfyWc6A)
-
-### Club comeback: Which is more danceable, Trance or 80's New Romantics?
-```{r}
-dancetempo <- playlists %>%                    # Start with awards.
-  mutate(
-    mode = ifelse(mode == 0, "Minor", "Major")
-  ) %>%
-  ggplot(                     # Set up the plot.
-    aes(
-      x = tempo,
-      y = danceability,
-      name = track.name,
-      color = category
-    )
-  ) +
-  geom_point(show.legend = FALSE) + 
-  # Scatter plot.
-  geom_rug(size = 0.1) +      # Add 'fringes' to show data distribution. 
-  facet_wrap(~category) +     # Separate charts per playlist.
-  scale_x_continuous(         # Fine-tune the x axis.
-    limits = c(105, 170),
-    #breaks = c(0, 0.50, 1),   # Use grid-lines for quadrants only.
-    minor_breaks = NULL       # Remove 'minor' grid-lines.
-  ) +
-  scale_y_continuous(         # Fine-tune the y axis in the same way.
-    limits = c(0.3, 1),
-    breaks = c(0.5, 0.75, 1),
-    minor_breaks = NULL
-  ) +
-  scale_color_discrete(guide = 'none') +
-  theme_light() +             # Use a simpler theme.
-  labs(                       # Make the titles nice.
-    x = "Tempo(BPM)",
-    y = "Danceability"
-  ) +
-  ggtitle('Danceability: New Romantic vs. Trance') +
-  theme(plot.title = element_text(hjust = 0.5))
-
-dancetempo <- dancetempo + theme(legend.position = "none")
-
-ggplotly(dancetempo)
-```
-
-***
-An immediate first observation is that the trance tracks range over a much smaller BPM interval.This was expected, as the genre is characterized by a tempo lying between 135-150 BPM. 
-
-The majority of the tracks in both genres seem to lie between the 0.5-0.75 danceability interval. Worth noting however, is the amount of trance tracks with a 'low' danceability under 0.5. 
-
-
 ### Is trance music really happier than the 80's New Romantic music?
 ```{r}
 scatter_feeling <- playlists %>%                    # Start with awards.
@@ -230,7 +387,7 @@ scatter_feeling <- playlists %>%                    # Start with awards.
   ) +
   geom_point(alpha = 0.45, width = 0.1) +
   #geom_jitter(alpha = 0.45, width = 0.1) +
-  facet_wrap(~ category) +
+  facet_wrap(~ playlist) +
    scale_x_continuous(         # Fine-tune the x axis.
     limits = c(0, 1),
     breaks = c(0, 0.50, 1),   # Use grid-lines for quadrants only.
@@ -295,11 +452,28 @@ The song is a typical example of the structure of a trance track, as it is compr
 The sequence on the synths (D#/E, F# and G#) repeats throughout the song and becomes louder when the vocals stop. At 120 sec there is a pure synth buildup to a 'peak' which ends around 150 seconds.
 
 ### Possible explanation for the angry trance tracks? - A comparison of musical keys for New Romantic and Trance tracks
+```{r}
+playlists$key[playlists$key == "0"] <- "C"
+playlists$key[playlists$key == "1"] <- "C#"
+playlists$key[playlists$key == "2"] <- "D"
+playlists$key[playlists$key == "3"] <- "D#"
+playlists$key[playlists$key == "4"] <- "E"
+playlists$key[playlists$key == "5"] <- "F"
+playlists$key[playlists$key == "6"] <- "F#"
+playlists$key[playlists$key == "7"] <- "G"
+playlists$key[playlists$key == "8"] <- "G#"
+playlists$key[playlists$key == "9"] <- "A"
+playlists$key[playlists$key == "10"] <- "A#"
+playlists$key[playlists$key == "11"] <- "B"
+
+playlists <- playlists %>%
+  mutate(Key = if_else(mode == 0, paste(key, 'm', sep = ""), key))
+```
 
 ```{r}
 playlists1 <- playlists
 playlists1$Key <- factor(playlists1$Key, levels = c("A", "Am", "A#", "A#m", "B", "Bm","C", "Cm", "C#", "C#m", "D", "Dm", "D#", "D#m", "E", "Em", "F", "Fm", "F#", "F#m", "G", "Gm", "G#", "G#m"))
-ggplot(playlists1, aes(x = Key, fill = category)) + 
+ggplot(playlists1, aes(x = Key, fill = playlist)) + 
   geom_bar(position = 'dodge') +
   ggtitle('Keys of New Romantic and Trance tracks') +
   theme(plot.title = element_text(hjust = 0.5),
