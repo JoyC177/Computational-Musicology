@@ -91,7 +91,7 @@ Both songs contain well known riffs and are comprised of a musical form that dis
 
 
 ### Club Comeback: Which is **more danceable**, Trance or 80's New Romantics? {data-commentary-width=350}
-```{r}
+```{r fig.width=12, fig.height=11}
 dancetempo <- playlists %>%                    # Start with awards.
   mutate(
     mode = ifelse(mode == 0, "Minor", "Major")
@@ -149,8 +149,8 @@ In [Sunrise (Radio-Edit) - Ratty](https://open.spotify.com/track/3dnGed4dwCkO2Ao
 
 A New Romantic track with the same danceability score is [I melt with you - Modern English](https://open.spotify.com/track/3xzRBn3ywzobJrc1efC7Sb?si=J3dkFQDFS9CQq23rJVPzmg). The New Romantic tracks typically stay at the same tempo throughout the song, but in this particular track the beat cuts out at 3.05 for just under 15 seconds and only the guitar is heard. Once again when we look at the novelty function, the lack of percussion causes spurious peaks. After less than 15 seconds, the beat resumes and the tempo becomes relatively stable again.
 
-### Getting into the mood: Is trance music really happier than the 80's New Romantic music?
-```{r}
+### Getting into the mood: Is trance music really happier than the 80's New Romantic music? {data-commentary-width=350}
+```{r fig.width=12, fig.height=11}
 scatter_feeling <- playlists %>%                    # Start with awards.
   mutate(
     mode = ifelse(mode == 0, "Minor", "Major")
@@ -166,10 +166,10 @@ scatter_feeling <- playlists %>%                    # Start with awards.
   ) +
   geom_point(alpha = 0.45, width = 0.1) +
    geom_rug(size = 0.1) +
-  annotate("text", label = "Angry", x = 0.1, y = 0.55, size = 3, colour = "red")+
-    annotate("text", label = "Happy", x = 0.6, y = 0.55, size = 3, colour = "orange")+
-    annotate("text", label = "Sad", x = 0.1, y = 0.05, size = 3, colour = "blue")+
-    annotate("text", label = "Calm", x = 0.6, y = 0.05, size = 3, colour = "green")+
+  annotate("text", label = "Angry", x = 0.1, y = 0.55, size = 4, colour = "red")+
+    annotate("text", label = "Happy", x = 0.6, y = 0.55, size = 4, colour = "purple")+
+    annotate("text", label = "Sad", x = 0.1, y = 0.05, size = 4, colour = "blue")+
+    annotate("text", label = "Calm", x = 0.6, y = 0.05, size = 4, colour = "green")+
   #geom_jitter(alpha = 0.45, width = 0.1) +
   facet_wrap(~ playlist) +
    scale_x_continuous(         # Fine-tune the x axis.
@@ -204,9 +204,9 @@ Mostly high energy and high valence means the New Romantic tracks would generall
 
 The trace tracks are also louder than the New Romantic ones with an average loudness of -9.9 compared to -8. 
 
-Finally the amount of tracks in both major and minor keys seems to be about the same. I had expected more minor tracks in the trance playlist, but this was purely based on minor tracks being a common characteristic of trance music.
+Finally the trance playlist seems to contain slightly more tracks in a minor key. I had expected this, due to the fact that minor keys are a common occurence in trance music.
 
-### A (rare) 'euphoric' trance track: Peaks and vocals.
+### A (rare) 'euphoric' trance track: Peaks and vocals.{data-commentary-width=350}
 ```{r}
 ernesto <-
   get_tidy_audio_analysis("0pMUR7Uvp6vxlbG0qBFvgM") %>%
@@ -231,9 +231,262 @@ ernesto %>%
   scale_fill_viridis_c()
 ```
 
+
+```{r}
+depeche<-
+  get_tidy_audio_analysis("0qi4b1l0eT3jpzeNHeFXDT") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+
+depeche %>%
+  mutate(pitches = map(pitches, compmus_normalise, "manhattan")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Just can't get enough - Depeche Mode") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
+```{r}
+depeche<-
+  get_tidy_audio_analysis("1ChulFMnwxoD74Me8eX2TU") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+
+depeche %>%
+  mutate(pitches = map(pitches, compmus_normalise, "manhattan")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "You spin me round") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
+
 ***
 [Dark Side Of The Moon by Ernesto vs. Bastian](https://open.spotify.com/track/05lLA8ljMPozdEtFycI52o?si=_t7JeD6QQAK5jIO3w0vMsw) seems to stand out from the majority of 'angry' dance tracks and contains the highest valence in the trance dataset. Here the corresponding chromagram is shown. 
 
 The song is a typical example of the structure of a trance track, as it is comprised of sections that distinctly build tension to either end in "peaks" or "drops". Here those sections can clearly be seen by the absence of the vocals which mostly make up B and C. 
 
 The sequence on the synths (D#/E, F# and G#) repeats throughout the song and becomes louder when the vocals stop. At 120 sec there is a pure synth buildup to a 'peak' which ends around 150 seconds.
+
+### Possible explanation for the angry trance tracks? - A comparison of musical keys for New Romantic and Trance tracks {data-commentary-width=350}
+```{r}
+playlists$key[playlists$key == "0"] <- "C"
+playlists$key[playlists$key == "1"] <- "C#"
+playlists$key[playlists$key == "2"] <- "D"
+playlists$key[playlists$key == "3"] <- "D#"
+playlists$key[playlists$key == "4"] <- "E"
+playlists$key[playlists$key == "5"] <- "F"
+playlists$key[playlists$key == "6"] <- "F#"
+playlists$key[playlists$key == "7"] <- "G"
+playlists$key[playlists$key == "8"] <- "G#"
+playlists$key[playlists$key == "9"] <- "A"
+playlists$key[playlists$key == "10"] <- "A#"
+playlists$key[playlists$key == "11"] <- "B"
+
+```
+
+```{r}
+ggplot(playlists, aes(x = key, fill = mode_name)) + 
+  geom_bar() +
+  facet_wrap(~playlist) +
+  ggtitle('Keys of New Romantic and Trance tracks') +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+***
+
+On the left a bar chart of the keys of the tracks for both genres is shown. The first clear observation is the large amount of New Romantic tracks in the key of C major. This key is commonly associated with pop music, so that isn't surprising. A typical example in this category would be [Just can't get enough by Depeche mode](https://open.spotify.com/track/0qi4b1l0eT3jpzeNHeFXDT?si=dbmWtCbgR2ejrj9GVcLTOg). 
+Both A and A# also contain a relatively high amount of New Romantic tracks.
+
+
+Another clear observation is the large amount of trance tracks in the key of G#, with this key being completely absent in the New Romantic playlist. Within music psychology this key is perceived to have a sense of death, eternity and judgment. At first the large amount of tracks seemed strange to me, but I believe this key gives off the haunting feeling that many trance tracks have. I read that this key could be described as "Expansive viewpoints of a dark cosmos and existence" and I feel this is indeed so. [Universal Nation by Push](https://open.spotify.com/track/34PgbZHudjUapNEqsb1WcW?si=xwvX8fEtQnOQtKywH00NRA) is a song in G# that really feels like a trip through the emptiness and eternity of space.
+
+Moreover the trance playlist seems to contain a relatively high number of songs in G. This key is perceived to contain a feeling of fantasy and peace, which is more what I expected to find.
+
+The trance playlist also contains songs in C#, while this key is absent from the New Romantic playlist. The proportion of minor keys indeed seems to be slightly higher in the trance playlist.
+
+
+
+### Chroma and timbre in 80's New Romantic pop: A typical example {data-commentary-width=350}
+
+```{r}
+duel <-
+  get_tidy_audio_analysis("4M2tEAdFRdg0U8rAgYa8o2") %>%
+  compmus_align(bars, segments) %>%
+  select(bars) %>%
+  unnest(bars) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "acentre", norm = "manhattan"
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"
+      )
+  )
+bind_rows(
+  duel %>%
+    compmus_self_similarity(pitches, "manhattan") %>%
+    mutate(d = d / max(d), type = "Chroma"),
+  duel %>%
+    compmus_self_similarity(timbre, "euclidean") %>%
+    mutate(d = d / max(d), type = "Timbre")
+) %>%
+  mutate() %>%
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "") +
+  ggtitle('Comparison of timbre and chroma features: Duel - Propaganda') +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+*** 
+[Duel by Propaganda](https://open.spotify.com/track/4M2tEAdFRdg0U8rAgYa8o2?si=NqMAbydvRBK9_zgHDP6v1w) is a typical example of an 80's New Romantic track. The track contains two basic synth chord progressions: one that is repeated throughout the verses and one for the chorus. During the pre-chorus a single chord is played. These repetitive sections can clearly be seen in the chroma plot, with the first verse lasting from 10-47 seconds, followed by the pre-chorus from 47-60 seconds and then the chorus from 60-90 seconds. The second chorus is followed by an instrumental bridge as can be seen by the distinctive section ranging from 160-200 seconds. The chorus is then repeated until the end of the song.
+
+An important observation with this track is that the chroma plot and the timbre plot seem to show the same similarity pattern. This is because Both plots show the distinctive sections and their repetitions, as there is no variation between the different verses. The bridge is particularly interesting here, as the timbre is different to the other sections of the song. The song suddenly slows down and the melody changes for about ten seconds, to then instrumentally build up to the chorus. 
+
+### Chroma and timbre in 90's trance: A typical example {data-commentary-width=350}
+
+```{r}
+children <-
+  get_tidy_audio_analysis("73iNrs3ww2JCPHS4pgTryg") %>%
+  compmus_align(bars, segments) %>%
+  select(bars) %>%
+  unnest(bars) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "acentre", norm = "manhattan"
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  )
+bind_rows(
+  children %>%
+    compmus_self_similarity(pitches, "aitchison") %>%
+    mutate(d = d / max(d), type = "Chroma"),
+  children %>%
+    compmus_self_similarity(timbre, "euclidean") %>%
+    mutate(d = d / max(d), type = "Timbre")
+) %>%
+  mutate() %>%
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "")  +
+  ggtitle('Comparison of timbre and chroma features: Children - Robert Miles') +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+***
+[Children by Robert Miles](https://open.spotify.com/track/73iNrs3ww2JCPHS4pgTryg?si=hz1Mn-qtRpKItDDrNY-tIQ) is a well known trance classic from 1995. Many are familiar with its dream-like melodies and steady four-on-the-flour bass drum. Miles was inspired both by a response to photographs of child Yugoslav war victims that his father had brought home from a humanitarian mission and his idea to create a track to end DJ sets, intended to calm rave attendants prior to their driving home as a means to reduce car accident deaths. 
+
+The chroma plot shows the repetition of two main sections, with the checkerboard pattern from 45-95 seconds being the chorus with the well known dreamy synth melody. The section from 95-135 seconds contains a heavy beat with shorter staccato synth melodies.
+
+The timbre plot is interesting, as it doesn't correspond to the clear checkerboard pattern shown in the chroma plot. This is quite strange, as the simple structure of the song should be reflected here too. The second chorus does feel slightly 'busier' than the first chorus, which leads me to believe there are more layers of instruments playing the same notes in the second repetition. This would explain why you couldn't detect this change in the chroma plot. At 190 seconds the timbre of the song is very different from other sections, as can be seen by the bright cross. In this section the melodies pick up in speed and become more urgent than dreamy. 
+
+
+### Classification {data-commentary-width=350}
+
+![Classification](\Users\jcros\Downloads\classification.png)
+
+***
+The first classifier I tried when trying to distinguish between the trance and New Romantic tracks was a random forest classifier. This classifier already performs well, as shown in the following table: 
+
+class        | precision    | recall
+-------------| -------------|-------------
+New Romantic | 0.9066667	  |0.9066667
+Trance       | 0.9320388	  |0.9320388
+
+Using a random-forest classifier, the most important features for classifying tracks among these playlists are (ranked from most to least important):
+
+1. Timbre Component 6
+2. Valence
+3. Timbre Component 3
+4. Tempo
+5. Instrumentalness
+
+After these five features, there is a substantial drop in importance. The results of the random forest classifier with just these five features are shown below:
+
+class        | precision    | recall
+-------------| -------------|-------------
+New Romantic | 0.9342105	  |0.9466667
+Trance       | 0.9607843	  |0.9514563
+
+
+
+The classifier achieves a higher precision and recall for both genres when only the top 5 most important features are used.
+
+When plotting the two most important features, a clear non linear decision boundary can be observed. This lead me to try a Support Vector Machine (SVM), in the hopes to be able to capture the corresponding decision regions. The SVM results are shown below:
+
+class        | precision    | recall
+-------------| -------------|-------------
+New Romantic | 0.9605263	  |0.9733333
+Trance       | 0.9803922	  |0.9708738
+
+
+
+
+While the precision stays the same, the recall goes up by 3/4% . Although it follows from the scores that a few trance tracks were thought to be New Romantic tracks, the SVM does a very good job at distinguishing between the two.
+
+
+
+
+
+
+
+### Conclusion
+Looking through the tracks in each key, the characteristics of each key seem to clearly be reflected in the general feel of the track. A large amount of the trance tracks are in a key that is associated with negative emotions. These negative emotions, combined with the high amount of energy appears to be a plausible explanation for the large amount of tracks classified as "angry". Interestingly, the spread of the tracks in the "overall emotions" plot seems to be reflected in the key plot.
