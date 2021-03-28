@@ -69,7 +69,7 @@ Although the synthesizer is common in both playlists, there are some obvious dif
 
 Typical examples of interesting tracks from the 80's playlist would be:
 
-* Blue Monday - New Order
+* Duel - Propaganda
 * Fade To Grey - Visage. 
 
 Both tracks contain a basic chord progression in a minor key played on a synthesizer repeated throughout the song, accompanied by a similar drum and high hat beat. 
@@ -77,7 +77,7 @@ Both tracks contain a basic chord progression in a minor key played on a synthes
 Typical examples of interesting tracks from the trance playlist would be:
 
 * Adagio for Strings - Tiësto
-* Carte Blanche - Veracocha. 
+* Children - Robert Miles. 
 
 Both songs contain well known riffs and are comprised of a musical form that distinctly builds tension to either end in "peaks" or "drops". Both songs are also in minor keys, a common characteristic of trance music.
 
@@ -104,7 +104,7 @@ dancetempo <- playlists %>%                    # Start with awards.
       color = playlist
     )
   ) +
-  geom_point(show.legend = FALSE) + 
+  geom_point(show.legend = FALSE) +
   # Scatter plot.
   geom_rug(size = 0.1) +      # Add 'fringes' to show data distribution. 
   facet_wrap(~playlist) +     # Separate charts per playlist.
@@ -135,17 +135,24 @@ ggplotly(dancetempo)
 ***
 An immediate first observation is that the trance tracks range over a much smaller BPM interval.This was expected, as the genre is characterized by a tempo lying between 135-150 BPM. 
 
-The majority of the tracks in both genres seem to lie between the 0.5-0.75 danceability interval. Worth noting however, is the amount of trance tracks with a 'low' danceability under 0.5. 
+The majority of the tracks in both genres seem to lie between the 0.5-0.75 danceability interval. There are two key observations here:
+
+Firstly, there are quite a few trance tracks with a 'low' danceability under 0.5. This is surprising to me, as trance is a form of dance music.
+
+
+Moreover, as the tempo increases, the New Romantic tracks tend to become less danceable. 
 
 ### Trance: Not very danceable dance music? {data-commentary-width=350}
 
-![Tempograms and novelty functions](\Users\jcros\Downloads\tgnvannotate.png)
+![Tempograms and novelty functions](\Users\jcros\Documents\Computational-Musicology\tgnvannotate.png)
 
 
 *** 
 As shown in the previous plot, quite a few of the trance tracks have been assigned a low danceability value. A common characteristic of trance music is a mid-song climax followed by a soft breakdown disposing of beats and percussion entirely, leaving the melody or atmospherics to stand alone for an extended period before gradually building up again. 
 
-In [Sunrise (Radio-Edit) - Ratty](https://open.spotify.com/track/3dnGed4dwCkO2AoQVnbScw?si=F6ZgC9z6TbW757Am-VSEdw) these breakdown sections consist of female vocals in a style reminiscent of an elegy, with soft synths playing in the background. The lack of percussion causes the Spotify API to have trouble determining the tempo, as can be seen between 55 and 105 seconds and again after 200 seconds. When looking at the novelty function of the selected section, it becomes obvious that the lack of percussion causes Spotify to have trouble determining the note onsets, and the spurious peaks cause the 'random' tempo in the tempogram. This is presumably one of the reasons of the low danceability score (0.46), as danceable songs are presumed to have a relatively stable rhythm. Other songs with a low danceability score such as [Communication](https://open.spotify.com/track/0W0tn4jpmnwnPZxO8nyhS7?si=i_NuEaQgTuWn4In4kTvNHQ) and [Shivers](https://open.spotify.com/track/0pfJH3eRkM4t9wlg6LwuTU?si=DoPEjtEMRTqm588RWUNMjQ) also contain acapella breakdowns.
+In [Sunrise (Radio-Edit) - Ratty](https://open.spotify.com/track/3dnGed4dwCkO2AoQVnbScw?si=F6ZgC9z6TbW757Am-VSEdw) these breakdown sections consist of a sample of female vocals from [Song to the Siren - This Mortal Coil](https://open.spotify.com/track/26uVYNtKahTAcZMDWiuBnt?si=zo7gV_09Su6Z1Y4q5olBlQ), with soft synths playing in the background. In these sections determining the tempo is difficult, as can be seen between 55 and 105 seconds and again after 200 seconds. 
+
+When looking at the novelty function of the selected section, it becomes obvious that the lack of percussion in these sections causes Spotify to have trouble determining the note onsets, and the spurious peaks cause the 'random' tempo in the tempogram. This is presumably one of the reasons for the low danceability score (0.46), as danceable songs are presumed to have a relatively stable rhythm. Other trance tracks with a low danceability score such as [Communication](https://open.spotify.com/track/0W0tn4jpmnwnPZxO8nyhS7?si=i_NuEaQgTuWn4In4kTvNHQ) and [Shivers](https://open.spotify.com/track/0pfJH3eRkM4t9wlg6LwuTU?si=DoPEjtEMRTqm588RWUNMjQ) also contain acapella breakdowns.
 
 A New Romantic track with the same danceability score is [I melt with you - Modern English](https://open.spotify.com/track/3xzRBn3ywzobJrc1efC7Sb?si=J3dkFQDFS9CQq23rJVPzmg). The New Romantic tracks typically stay at the same tempo throughout the song, but in this particular track the beat cuts out at 3.05 for just under 15 seconds and only the guitar is heard. Once again when we look at the novelty function, the lack of percussion causes spurious peaks. After less than 15 seconds, the beat resumes and the tempo becomes relatively stable again.
 
@@ -200,11 +207,12 @@ ggplotly(scatter_feeling)
 On the left an interactive (*Hover over the track to see track information*) plot of the energy and valence variables obtained from the Spotify API is shown. When combined, the four quadrants of the graph correspond to emotions. 
 
 Both the New Romantic and the trance tracks mostly contain a high amount of energy. Surprisingly, the trance tracks generally emit a lower range of valence. High energy and low valence would indicate that trance music would be classified as angry. This is in contrast to the euphoric or slightly sad feeling the heavy synths are generally described to have. 
+
 Mostly high energy and high valence means the New Romantic tracks would generally be perceived to be happy, though there are some in both the sad and angry region. 
 
-The trace tracks are also louder than the New Romantic ones with an average loudness of -9.9 compared to -8. 
+The trace tracks are also louder than the New Romantic ones with an average overall loudness of -9.9dB compared to -8dB. This isn't too surprising, as dance music is generally quite loud.
 
-Finally the trance playlist seems to contain slightly more tracks in a minor key. I had expected this, due to the fact that minor keys are a common occurence in trance music.
+Finally the trance playlist seems to contain slightly more tracks in a minor key. I had expected this, due to the fact that minor keys are a common occurrence in trance music.
 
 ### A (rare) 'euphoric' trance track: Peaks and vocals.{data-commentary-width=350}
 ```{r}
@@ -227,54 +235,6 @@ ernesto %>%
   ) +
   geom_tile() +
   labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Dark Side Of The Moon - Ernesto vs. Bastian") +
-  theme_minimal() +
-  scale_fill_viridis_c()
-```
-
-
-```{r}
-depeche<-
-  get_tidy_audio_analysis("0qi4b1l0eT3jpzeNHeFXDT") %>%
-  select(segments) %>%
-  unnest(segments) %>%
-  select(start, duration, pitches)
-
-depeche %>%
-  mutate(pitches = map(pitches, compmus_normalise, "manhattan")) %>%
-  compmus_gather_chroma() %>% 
-  ggplot(
-    aes(
-      x = start + duration / 2,
-      width = duration,
-      y = pitch_class,
-      fill = value
-    )
-  ) +
-  geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Just can't get enough - Depeche Mode") +
-  theme_minimal() +
-  scale_fill_viridis_c()
-```
-```{r}
-depeche<-
-  get_tidy_audio_analysis("1ChulFMnwxoD74Me8eX2TU") %>%
-  select(segments) %>%
-  unnest(segments) %>%
-  select(start, duration, pitches)
-
-depeche %>%
-  mutate(pitches = map(pitches, compmus_normalise, "manhattan")) %>%
-  compmus_gather_chroma() %>% 
-  ggplot(
-    aes(
-      x = start + duration / 2,
-      width = duration,
-      y = pitch_class,
-      fill = value
-    )
-  ) +
-  geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "You spin me round") +
   theme_minimal() +
   scale_fill_viridis_c()
 ```
@@ -322,7 +282,7 @@ Another clear observation is the large amount of trance tracks in the key of G#,
 
 Moreover the trance playlist seems to contain a relatively high number of songs in G. This key is perceived to contain a feeling of fantasy and peace, which is more what I expected to find.
 
-The trance playlist also contains songs in C#, while this key is absent from the New Romantic playlist. The proportion of minor keys indeed seems to be slightly higher in the trance playlist.
+The trance playlist also contains songs in C#, while this key is absent from the New Romantic playlist. The proportion of minor keys seems to indeed be higher in the trance playlist.
 
 
 
@@ -436,7 +396,8 @@ bind_rows(
 
 The chroma plot shows the repetition of two main sections, with the checkerboard pattern from 45-95 seconds being the chorus with the well known dreamy synth melody. The section from 95-135 seconds contains a heavy beat with shorter staccato synth melodies.
 
-The timbre plot is interesting, as it doesn't correspond to the clear checkerboard pattern shown in the chroma plot. This is quite strange, as the simple structure of the song should be reflected here too. The second chorus does feel slightly 'busier' than the first chorus, which leads me to believe there are more layers of instruments playing the same notes in the second repetition. This would explain why you couldn't detect this change in the chroma plot. At 190 seconds the timbre of the song is very different from other sections, as can be seen by the bright cross. In this section the melodies pick up in speed and become more urgent than dreamy. 
+The timbre plot is interesting, as it shows a general trend in the trance tracks where the timbre doesn't correspond to the clear checkerboard pattern shown in the chroma plot. This is quite strange, as one would suspect the simple structure of the song should be reflected here too. When listening closely, the second chorus feels slightly 'busier' than the first chorus, which leads me to believe there are more layers of instruments playing the same notes in the second repetition. This would explain why you couldn't detect this change in the chroma plot. At 190 seconds the timbre of the song is very different from other sections, as can be seen by the bright cross. In this section the melodies pick up in speed and become more urgent than dreamy. 
+
 
 
 ### Classification {data-commentary-width=350}
@@ -444,7 +405,10 @@ The timbre plot is interesting, as it doesn't correspond to the clear checkerboa
 ![Classification](\Users\jcros\Downloads\classification.png)
 
 ***
-The first classifier I tried when trying to distinguish between the trance and New Romantic tracks was a random forest classifier. This classifier already performs well, as shown in the following table: 
+In this section I compare various classifiers to distinguish between the trance and New ROmantic playlist. In each case 10-fold cross validation was applied.
+
+
+The first classifier I tried when trying to distinguish between the trance and New Romantic tracks was a random forest classifier. This classifier already performs well. The results are shown in the following table.
 
 class        | precision    | recall
 -------------| -------------|-------------
@@ -467,10 +431,9 @@ New Romantic | 0.9342105	  |0.9466667
 Trance       | 0.9607843	  |0.9514563
 
 
-
 The classifier achieves a higher precision and recall for both genres when only the top 5 most important features are used.
 
-When plotting the two most important features, a clear non linear decision boundary can be observed. This lead me to try a Support Vector Machine (SVM), in the hopes to be able to capture the corresponding decision regions. The SVM results are shown below:
+When plotting two of the most important features, a non linear decision boundary can be observed as shown in the plot on the left. This lead me to try a Support Vector Machine (SVM), in the hopes to be able to capture the corresponding decision regions. The SVM results are shown below using all features:
 
 class        | precision    | recall
 -------------| -------------|-------------
@@ -480,10 +443,7 @@ Trance       | 0.9803922	  |0.9708738
 
 
 
-While the precision stays the same, the recall goes up by 3/4% . Although it follows from the scores that a few trance tracks were thought to be New Romantic tracks, the SVM does a very good job at distinguishing between the two.
-
-
-
+While the precision stays the same, the recall goes up by 3/4% . The confusion matrix is shown on the left. The the SVM does a very good job at distinguishing between the two.
 
 
 
