@@ -5,7 +5,7 @@ date: "Spring 2021"
 output: 
   flexdashboard::flex_dashboard:
     storyboard: true
-    theme: lumen
+    theme: yeti
     orientation: rows
     vertical_layout: fill
 ---
@@ -24,7 +24,6 @@ library(compmus)
 library(patchwork)
 library(stringr)
 library(scales)
-#source('spotify.R')
 library(shinyLP)
 
 get_conf_mat <- function(fit) {
@@ -59,7 +58,7 @@ playlists <-
 
 
 
-### Introduction to the playlists: **New Romantics vs. Trance**{data-commentary-width=700}
+### Introduction to the playlists: **New Romantics vs. Trance** {data-commentary-width=700}
 My corpus consists of a playlist containing 80's New Romantic songs and a playlist containing trance classics from the early 90's to the mid 2010's. I was inspired by a statement made by BBC Radio 2, referring to Blue Monday (New Order's 1983 hit), as "a crucial link between Seventies disco and the dance/house boom that took off at the end of the New Romantic." The repetitive use of synths and heavy drum beats is a known characteristic of both New Romantic and trance music, and lead me to **compare the two and see what the main differences are between the two genres**. To do this, I will examine:
 
 * Pitch features
@@ -87,4 +86,5 @@ Both songs contain well known riffs and are comprised of a musical form that dis
 ***
 
 <iframe src="https://open.spotify.com/embed/playlist/3XKJmcxhdP8NXIoamf5zwc" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+
 <iframe src="https://open.spotify.com/embed/playlist/7hIxxRmPxdpBa6zuDUC1FM" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
