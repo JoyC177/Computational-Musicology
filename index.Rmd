@@ -22,9 +22,8 @@ library(plotly)
 library(kableExtra)
 library(compmus)
 library(patchwork)
-library(stringr)
-library(scales)
-library(shinyLP)
+
+
 
 get_conf_mat <- function(fit) {
   outcome <- .get_tune_outcome_names(fit)
@@ -88,3 +87,153 @@ Both songs contain well known riffs and are comprised of a musical form that dis
 <iframe src="https://open.spotify.com/embed/playlist/3XKJmcxhdP8NXIoamf5zwc" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
 <iframe src="https://open.spotify.com/embed/playlist/7hIxxRmPxdpBa6zuDUC1FM" width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+
+
+
+### Club Comeback: Which is **more danceable**, Trance or 80's New Romantics? {data-commentary-width=350}
+```{r}
+dancetempo <- playlists %>%                    # Start with awards.
+  mutate(
+    mode = ifelse(mode == 0, "Minor", "Major")
+  ) %>%
+  ggplot(                     # Set up the plot.
+    aes(
+      x = tempo,
+      y = danceability,
+      name = track.name,
+      color = playlist
+    )
+  ) +
+  geom_point(show.legend = FALSE) + 
+  # Scatter plot.
+  geom_rug(size = 0.1) +      # Add 'fringes' to show data distribution. 
+  facet_wrap(~playlist) +     # Separate charts per playlist.
+  scale_x_continuous(         # Fine-tune the x axis.
+    limits = c(105, 170),
+    #breaks = c(0, 0.50, 1),   # Use grid-lines for quadrants only.
+    minor_breaks = NULL       # Remove 'minor' grid-lines.
+  ) +
+  scale_y_continuous(         # Fine-tune the y axis in the same way.
+    limits = c(0.3, 1),
+    breaks = c(0.5, 0.75, 1),
+    minor_breaks = NULL
+  ) +
+  scale_color_discrete(guide = 'none') +
+  theme_light() +             # Use a simpler theme.
+  labs(                       # Make the titles nice.
+    x = "Tempo(BPM)",
+    y = "Danceability"
+  ) +
+  ggtitle('Danceability: New Romantic vs. Trance') +
+  theme(plot.title = element_text(hjust = 0.5))
+
+dancetempo <- dancetempo + theme(legend.position = "none")
+
+ggplotly(dancetempo)
+```
+
+***
+An immediate first observation is that the trance tracks range over a much smaller BPM interval.This was expected, as the genre is characterized by a tempo lying between 135-150 BPM. 
+
+The majority of the tracks in both genres seem to lie between the 0.5-0.75 danceability interval. Worth noting however, is the amount of trance tracks with a 'low' danceability under 0.5. 
+
+### Trance: Not very danceable dance music? {data-commentary-width=350}
+
+![Tempograms and novelty functions](\Users\jcros\Downloads\tgnvannotate.png)
+
+
+*** 
+As shown in the previous plot, quite a few of the trance tracks have been assigned a low danceability value. A common characteristic of trance music is a mid-song climax followed by a soft breakdown disposing of beats and percussion entirely, leaving the melody or atmospherics to stand alone for an extended period before gradually building up again. 
+
+In [Sunrise (Radio-Edit) - Ratty](https://open.spotify.com/track/3dnGed4dwCkO2AoQVnbScw?si=F6ZgC9z6TbW757Am-VSEdw) these breakdown sections consist of female vocals in a style reminiscent of an elegy, with soft synths playing in the background. The lack of percussion causes the Spotify API to have trouble determining the tempo, as can be seen between 55 and 105 seconds and again after 200 seconds. When looking at the novelty function of the selected section, it becomes obvious that the lack of percussion causes Spotify to have trouble determining the note onsets, and the spurious peaks cause the 'random' tempo in the tempogram. This is presumably one of the reasons of the low danceability score (0.46), as danceable songs are presumed to have a relatively stable rhythm. Other songs with a low danceability score such as [Communication](https://open.spotify.com/track/0W0tn4jpmnwnPZxO8nyhS7?si=i_NuEaQgTuWn4In4kTvNHQ) and [Shivers](https://open.spotify.com/track/0pfJH3eRkM4t9wlg6LwuTU?si=DoPEjtEMRTqm588RWUNMjQ) also contain acapella breakdowns.
+
+A New Romantic track with the same danceability score is [I melt with you - Modern English](https://open.spotify.com/track/3xzRBn3ywzobJrc1efC7Sb?si=J3dkFQDFS9CQq23rJVPzmg). The New Romantic tracks typically stay at the same tempo throughout the song, but in this particular track the beat cuts out at 3.05 for just under 15 seconds and only the guitar is heard. Once again when we look at the novelty function, the lack of percussion causes spurious peaks. After less than 15 seconds, the beat resumes and the tempo becomes relatively stable again.
+
+### Getting into the mood: Is trance music really happier than the 80's New Romantic music?
+```{r}
+scatter_feeling <- playlists %>%                    # Start with awards.
+  mutate(
+    mode = ifelse(mode == 0, "Minor", "Major")
+  ) %>%
+  ggplot(                     # Set up the plot.
+    aes(
+      x = valence,
+      y = energy,
+      size = loudness,
+      colour = mode,
+      name = track.name
+    )
+  ) +
+  geom_point(alpha = 0.45, width = 0.1) +
+   geom_rug(size = 0.1) +
+  annotate("text", label = "Angry", x = 0.1, y = 0.55, size = 3, colour = "red")+
+    annotate("text", label = "Happy", x = 0.6, y = 0.55, size = 3, colour = "orange")+
+    annotate("text", label = "Sad", x = 0.1, y = 0.05, size = 3, colour = "blue")+
+    annotate("text", label = "Calm", x = 0.6, y = 0.05, size = 3, colour = "green")+
+  #geom_jitter(alpha = 0.45, width = 0.1) +
+  facet_wrap(~ playlist) +
+   scale_x_continuous(         # Fine-tune the x axis.
+    limits = c(0, 1),
+    breaks = c(0, 0.50, 1),   # Use grid-lines for quadrants only.
+    minor_breaks = NULL       # Remove 'minor' grid-lines.
+  ) +
+  scale_y_continuous(         # Fine-tune the y axis in the same way.
+    limits = c(0, 1.0),
+    breaks = c(0, 0.50, 1),
+    minor_breaks = NULL
+  ) +
+   scale_size_continuous(      # Fine-tune the sizes of each point.
+    trans = "exp",              # Use an exp transformation to emphasize loud.
+    guide = "none"            # Remove the legend for size.
+  ) +
+  theme_light() +             # Use a simpler theme.
+  labs(                       # Make the titles nice.
+    x = "Valence",
+    y = "Energy",
+    colour = "Mode"
+  ) + ggtitle('Energy vs. Valence (size indicates loudness)') +
+  theme(plot.title = element_text(hjust = 0.5))
+ggplotly(scatter_feeling)
+```
+
+***
+On the left an interactive (*Hover over the track to see track information*) plot of the energy and valence variables obtained from the Spotify API is shown. When combined, the four quadrants of the graph correspond to emotions. 
+
+Both the New Romantic and the trance tracks mostly contain a high amount of energy. Surprisingly, the trance tracks generally emit a lower range of valence. High energy and low valence would indicate that trance music would be classified as angry. This is in contrast to the euphoric or slightly sad feeling the heavy synths are generally described to have. 
+Mostly high energy and high valence means the New Romantic tracks would generally be perceived to be happy, though there are some in both the sad and angry region. 
+
+The trace tracks are also louder than the New Romantic ones with an average loudness of -9.9 compared to -8. 
+
+Finally the amount of tracks in both major and minor keys seems to be about the same. I had expected more minor tracks in the trance playlist, but this was purely based on minor tracks being a common characteristic of trance music.
+
+### A (rare) 'euphoric' trance track: Peaks and vocals.
+```{r}
+ernesto <-
+  get_tidy_audio_analysis("0pMUR7Uvp6vxlbG0qBFvgM") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+
+ernesto %>%
+  mutate(pitches = map(pitches, compmus_normalise, "manhattan")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude", title = "Dark Side Of The Moon - Ernesto vs. Bastian") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
+
+***
+[Dark Side Of The Moon by Ernesto vs. Bastian](https://open.spotify.com/track/05lLA8ljMPozdEtFycI52o?si=_t7JeD6QQAK5jIO3w0vMsw) seems to stand out from the majority of 'angry' dance tracks and contains the highest valence in the trance dataset. Here the corresponding chromagram is shown. 
+
+The song is a typical example of the structure of a trance track, as it is comprised of sections that distinctly build tension to either end in "peaks" or "drops". Here those sections can clearly be seen by the absence of the vocals which mostly make up B and C. 
+
+The sequence on the synths (D#/E, F# and G#) repeats throughout the song and becomes louder when the vocals stop. At 120 sec there is a pure synth buildup to a 'peak' which ends around 150 seconds.
