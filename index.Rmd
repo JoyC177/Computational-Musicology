@@ -1,5 +1,5 @@
 ---
-title: "80's New Romantics vs 90's Trance: An Analytical Comparison"
+title: "80's New Romantics vs 90's Trance: An analytical comparison of the genres I grew up with"
 author: "Joy Crosbie"
 date: "Spring 2021"
 output: 
@@ -135,6 +135,8 @@ ggplotly(dancetempo)
 ***
 *Hover over the track to see track information*
 
+On the left the tempo in beats per minute and the danceability score, both obtained from the Spotify API, are plotted for each playlist.
+
 An immediate first observation is that the trance tracks range over a much smaller BPM interval.This was expected, as the genre is characterized by a tempo lying between 135-150 BPM. 
 
 The majority of the tracks in both genres seem to lie between the 0.5-0.75 danceability interval. There are two key observations here:
@@ -144,7 +146,7 @@ Firstly, there are quite a few trance tracks with a 'low' danceability under 0.5
 
 Moreover, as the tempo increases, the New Romantic tracks tend to become less danceable. 
 
-### Trance: Not very danceable dance music? {data-commentary-width=350}
+### Trance: Not very danceable dance music? A closer look at **tempo**. {data-commentary-width=350}
 
 ![Tempograms and novelty functions](\Users\jcros\Documents\Computational-Musicology\tgnvannotate.png)
 
@@ -158,7 +160,7 @@ When looking at the novelty function of the selected section, it becomes obvious
 
 A New Romantic track with the same danceability score is [I melt with you - Modern English](https://open.spotify.com/track/3xzRBn3ywzobJrc1efC7Sb?si=J3dkFQDFS9CQq23rJVPzmg). The New Romantic tracks typically stay at the same tempo throughout the song, but in this particular track the beat cuts out at 3.05 for just under 15 seconds and only the guitar is heard. Once again when we look at the novelty function, the lack of percussion causes spurious peaks. After less than 15 seconds, the beat resumes and the tempo becomes relatively stable again.
 
-### Getting into the mood: Is trance music really happier than the 80's New Romantic music? {data-commentary-width=350}
+### Getting in the **mood**: Is trance music really happier than the 80's New Romantic music? {data-commentary-width=350}
 ```{r fig.width=12, fig.height=11}
 scatter_feeling <- playlists %>%                    # Start with awards.
   mutate(
@@ -175,10 +177,10 @@ scatter_feeling <- playlists %>%                    # Start with awards.
   ) +
   geom_point(alpha = 0.45, width = 0.1) +
    geom_rug(size = 0.1) +
-  annotate("text", label = "Angry", x = 0.1, y = 0.55, size = 4, colour = "red")+
-    annotate("text", label = "Happy", x = 0.6, y = 0.55, size = 4, colour = "purple")+
-    annotate("text", label = "Sad", x = 0.1, y = 0.05, size = 4, colour = "blue")+
-    annotate("text", label = "Calm", x = 0.6, y = 0.05, size = 4, colour = "green")+
+  annotate("text", label = "Angry", x = 0.1, y = 0.55, size = 4)+
+    annotate("text", label = "Happy", x = 0.6, y = 0.55, size = 4)+
+    annotate("text", label = "Sad", x = 0.1, y = 0.05, size = 4)+
+    annotate("text", label = "Calm", x = 0.6, y = 0.05, size = 4)+
   #geom_jitter(alpha = 0.45, width = 0.1) +
   facet_wrap(~ playlist) +
    scale_x_continuous(         # Fine-tune the x axis.
@@ -206,18 +208,20 @@ ggplotly(scatter_feeling)
 ```
 
 ***
-On the left an interactive (*Hover over the track to see track information*) plot of the energy and valence variables obtained from the Spotify API is shown. When combined, the four quadrants of the graph correspond to emotions. 
+*Hover over the track to see track information*
+
+On the left an interactive plot of the energy and valence variables obtained from the Spotify API is shown. When combined, the four quadrants of the graph correspond to emotions. 
 
 Both the New Romantic and the trance tracks mostly contain a high amount of energy. Surprisingly, the trance tracks generally emit a lower range of valence. High energy and low valence would indicate that trance music would be classified as angry. This is in contrast to the euphoric or slightly sad feeling the heavy synths are generally described to have. 
 
-Mostly high energy and high valence means the New Romantic tracks would generally be perceived to be happy, though there are some in both the sad and angry region. 
+Mostly high energy and high valence means the New Romantic tracks would generally be perceived to be happy, though there are a few in the sad, angry and calm regions. 
 
 The trace tracks are also louder than the New Romantic ones with an average overall loudness of -9.9dB compared to -8dB. This isn't too surprising, as dance music is generally quite loud.
 
 Finally the trance playlist seems to contain slightly more tracks in a minor key. I had expected this, due to the fact that minor keys are a common occurrence in trance music.
 
-### A (rare) 'euphoric' trance track: Peaks and vocals.{data-commentary-width=350}
-```{r}
+### A (rare) 'euphoric' trance track: **Peaks and vocals**.{data-commentary-width=350}
+```{r fig.width=7}
 ernesto <-
   get_tidy_audio_analysis("0pMUR7Uvp6vxlbG0qBFvgM") %>%
   select(segments) %>%
@@ -242,13 +246,15 @@ ernesto %>%
 ```
 
 ***
+*On the left a chromagram is shown, containing the amount of energy contained in a pitch class at a given moment throughout the song.*
+
 [Dark Side Of The Moon by Ernesto vs. Bastian](https://open.spotify.com/track/05lLA8ljMPozdEtFycI52o?si=_t7JeD6QQAK5jIO3w0vMsw) seems to stand out from the majority of 'angry' dance tracks and contains the highest valence in the trance dataset. Here the corresponding chromagram is shown. 
 
 The song is a typical example of the structure of a trance track, as it is comprised of sections that distinctly build tension to either end in "peaks" or "drops". Here those sections can clearly be seen by the absence of the vocals which mostly make up B and C. 
 
 The sequence on the synths (D#/E, F# and G#) repeats throughout the song and becomes louder when the vocals stop. At 120 sec there is a pure synth buildup to a 'peak' which ends around 150 seconds.
 
-### Possible explanation for the angry trance tracks? - A comparison of musical keys for New Romantic and Trance tracks {data-commentary-width=350}
+### Possible explanation for the angry trance tracks? - A **comparison of musical keys** for New Romantic and Trance tracks {data-commentary-width=350}
 ```{r}
 playlists$key[playlists$key == "0"] <- "C"
 playlists$key[playlists$key == "1"] <- "C#"
@@ -284,11 +290,13 @@ Another clear observation is the large amount of trance tracks in the key of G#,
 
 Moreover the trance playlist seems to contain a relatively high number of songs in G. This key is perceived to contain a feeling of fantasy and peace, which is more what I expected to find.
 
-The trance playlist also contains songs in C#, while this key is absent from the New Romantic playlist. The proportion of minor keys seems to indeed be higher in the trance playlist.
+The trance playlist also contains songs in C#, while this key is absent from the New Romantic playlist. 
+
+The proportion of minor keys seems to indeed be higher in the trance playlist.
 
 
 
-### Chroma and timbre in 80's New Romantic pop: A typical example {data-commentary-width=350}
+### **Chroma and timbre** in 80's **New Romantic pop**: A typical example {data-commentary-width=350}
 
 ```{r fig.width = 7}
 duel <-
@@ -339,11 +347,14 @@ bind_rows(
 ```
 
 *** 
-[Duel by Propaganda](https://open.spotify.com/track/4M2tEAdFRdg0U8rAgYa8o2?si=NqMAbydvRBK9_zgHDP6v1w) is a typical example of an 80's New Romantic track. The track contains two basic synth chord progressions: one that is repeated throughout the verses and one for the chorus. During the pre-chorus a single chord is played. These repetitive sections can clearly be seen in the chroma plot, with the first verse lasting from 10-47 seconds, followed by the pre-chorus from 47-60 seconds and then the chorus from 60-90 seconds. The second chorus is followed by an instrumental bridge as can be seen by the distinctive section ranging from 160-200 seconds. The chorus is then repeated until the end of the song.
+*On the left, self-similarity matrices for both chroma and timbre are shown. By looking at the structures in these matrices, one can determine segments in a song that are similar to eachother in either chroma or timbre. Blocks correspond to homegenity along segments and paths correspond to repetitions among segments.*
+
+[Duel by Propaganda](https://open.spotify.com/track/4M2tEAdFRdg0U8rAgYa8o2?si=NqMAbydvRBK9_zgHDP6v1w) is a typical example of an 80's New Romantic track. The track contains two basic synth chord progressions: one that is repeated throughout the verses and one for the chorus. During the pre-chorus a single chord is played. These repetitive sections can clearly be seen in the chroma plot, with the first verse lasting from 10-47 seconds, followed by the pre-chorus from 47-60 seconds and then the chorus from 60-90 seconds. During the (pre)chroruses, there is an exact repetition of the synth harmonies as shown by the diagonal paths traversing each of the blocks corresponding to these sections. 
+The second chorus is followed by an instrumental bridge as can be seen by the distinctive section ranging from 160-200 seconds. The chorus is then repeated until the end of the song.
 
 An important observation with this track is that the chroma plot and the timbre plot seem to show the same similarity pattern. This is because Both plots show the distinctive sections and their repetitions, as there is no variation between the different verses. The bridge is particularly interesting here, as the timbre is different to the other sections of the song. The song suddenly slows down and the melody changes for about ten seconds, to then instrumentally build up to the chorus. 
 
-### Chroma and timbre in 90's trance: A typical example {data-commentary-width=350}
+### **Chroma and timbre** in 90's **trance**: A typical example {data-commentary-width=350}
 
 ```{r fig.width = 7}
 children <-
@@ -402,7 +413,7 @@ The timbre plot is interesting, as it shows a general trend in the trance tracks
 
 
 
-### Classification {data-commentary-width=350}
+### How well can a **classifier** distinguish between the two genres?  {data-commentary-width=350}
 
 ![Classification](\Users\jcros\Downloads\classification.png)
 
@@ -449,7 +460,7 @@ Both the precision and recall go up by an extra 2%. The confusion matrix is show
 
 
 
-### Conclusion
+### **Conclusions**
 
 In this portfolio I analyzed a trance and New Romantic playlist in order to find the main differences between the two genres. I had expected to find differences in valence, key, tempo and energy. To do this I examined Pitch, Timbre, tempo and other variables from the Spotify API. I will discuss my main findings below:
 
@@ -465,4 +476,5 @@ My main pitch finding was that the distribution of musical keys looks different 
 
 Interestingly, while the chroma plots often seemed to correspond to the timbre plots for the New Romantic playlist, this often wasn't the case for the trance tracks. While analyzing this further I learned about how the structures of pop songs differ from trance tracks. A typical pop song may consist of the following structure “Intro – Verse – Pre-Chorus – Chorus – Verse – Pre-Chorus – Chorus – Outro”, while the most common track structure for trance is : “Intro – Buildup – Breakdown – Build – Climax – Outro”. While pop songs generally maintain the same harmonies throughout the song, trance track sections can vary slightly in order to take the listener on a journey. This often means they will vary the levels of energy thoughout the song, which could lead to a difference in timbre.
 
-WHO COULD THIS BENEFIT???
+The external validity of my research may not be very high, as the amount of tracks in each playlist is quite low. Furthermore while these particular two genres might not be an immensly useful comparison, they are two of the genres I grew up to and i thoroughlyenjoyed listening to some of my nostalgic favourites and learning how effective and efficient R is for data visualisation at the same time. 
+This research could however be interesting to people who would like to do a simple comparison between two musical genres using the Spotify API, by giving them an overview of what is possible.  
