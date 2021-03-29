@@ -133,6 +133,8 @@ ggplotly(dancetempo)
 ```
 
 ***
+*Hover over the track to see track information*
+
 An immediate first observation is that the trance tracks range over a much smaller BPM interval.This was expected, as the genre is characterized by a tempo lying between 135-150 BPM. 
 
 The majority of the tracks in both genres seem to lie between the 0.5-0.75 danceability interval. There are two key observations here:
@@ -288,7 +290,7 @@ The trance playlist also contains songs in C#, while this key is absent from the
 
 ### Chroma and timbre in 80's New Romantic pop: A typical example {data-commentary-width=350}
 
-```{r}
+```{r fig.width = 7}
 duel <-
   get_tidy_audio_analysis("4M2tEAdFRdg0U8rAgYa8o2") %>%
   compmus_align(bars, segments) %>%
@@ -343,7 +345,7 @@ An important observation with this track is that the chroma plot and the timbre 
 
 ### Chroma and timbre in 90's trance: A typical example {data-commentary-width=350}
 
-```{r}
+```{r fig.width = 7}
 children <-
   get_tidy_audio_analysis("73iNrs3ww2JCPHS4pgTryg") %>%
   compmus_align(bars, segments) %>%
@@ -405,7 +407,7 @@ The timbre plot is interesting, as it shows a general trend in the trance tracks
 ![Classification](\Users\jcros\Downloads\classification.png)
 
 ***
-In this section I compare various classifiers to distinguish between the trance and New ROmantic playlist. In each case 10-fold cross validation was applied.
+In this section I compare various classifiers to distinguish between the trance and New Romantic playlist. In each case 10-fold cross validation was applied.
 
 
 The first classifier I tried when trying to distinguish between the trance and New Romantic tracks was a random forest classifier. This classifier already performs well. The results are shown in the following table.
@@ -443,10 +445,24 @@ Trance       | 0.9803922	  |0.9708738
 
 
 
-While the precision stays the same, the recall goes up by 3/4% . The confusion matrix is shown on the left. The the SVM does a very good job at distinguishing between the two.
-
+Both the precision and recall go up by an extra 2%. The confusion matrix is shown on the left. The the SVM does a very good job at distinguishing between the two.
 
 
 
 ### Conclusion
-Looking through the tracks in each key, the characteristics of each key seem to clearly be reflected in the general feel of the track. A large amount of the trance tracks are in a key that is associated with negative emotions. These negative emotions, combined with the high amount of energy appears to be a plausible explanation for the large amount of tracks classified as "angry". Interestingly, the spread of the tracks in the "overall emotions" plot seems to be reflected in the key plot.
+
+In this portfolio I analyzed a trance and New Romantic playlist in order to find the main differences between the two genres. I had expected to find differences in valence, key, tempo and energy. To do this I examined Pitch, Timbre, tempo and other variables from the Spotify API. I will discuss my main findings below:
+
+* Tempo
+
+My tempo findings confirmed my initial suspicions, the trance tracks are indeed mostly spread over a range of 135-150 BPM. I also found that New Romantic tracks become less danceable after abut 130 BPM onwards.
+
+* Pitch Features
+
+My main pitch finding was that the distribution of musical keys looks different for each genre. The trance playlist contained a lot of tracks in the keys of G and G#, while the New Romantic playlist contained none. The New Romantic playlist did contain a lot of tracks in the key of C compared to the trance playlist. I was very surprised to find that a lot of the trance tracks were classified as angry. I wonder whether one of the factors Spotify looks at could be key information, as the relatively large amount of tracks contained in G# were said to have a sense of death from a music psychology perspective. When this is combined with the high energy values that the trance tracks contained, I could see how that could point in the direction of an angry classification.
+
+* Timbre Features
+
+Interestingly, while the chroma plots often seemed to correspond to the timbre plots for the New Romantic playlist, this often wasn't the case for the trance tracks. While analyzing this further I learned about how the structures of pop songs differ from trance tracks. A typical pop song may consist of the following structure “Intro – Verse – Pre-Chorus – Chorus – Verse – Pre-Chorus – Chorus – Outro”, while the most common track structure for trance is : “Intro – Buildup – Breakdown – Build – Climax – Outro”. While pop songs generally maintain the same harmonies throughout the song, trance track sections can vary slightly in order to take the listener on a journey. This often means they will vary the levels of energy thoughout the song, which could lead to a difference in timbre.
+
+WHO COULD THIS BENEFIT???
