@@ -282,7 +282,7 @@ ggplot(playlists, aes(x = key, fill = mode_name)) +
 
 ***
 
-On the left a bar chart of the keys of the tracks for both genres is shown. The first clear observation is the large amount of New Romantic tracks in the key of C major. This key is commonly associated with pop music, so that isn't surprising. A typical example in this category would be [Just can't get enough by Depeche mode](https://open.spotify.com/track/0qi4b1l0eT3jpzeNHeFXDT?si=dbmWtCbgR2ejrj9GVcLTOg). 
+On the left a bar chart of the keys of the tracks for both genres is shown. The first clear observation is the large amount of New Romantic tracks in the key of C. This key is commonly associated with pop music, so that isn't surprising. A typical example in this category would be [Just can't get enough by Depeche mode](https://open.spotify.com/track/0qi4b1l0eT3jpzeNHeFXDT?si=dbmWtCbgR2ejrj9GVcLTOg). 
 Both A and A# also contain a relatively high amount of New Romantic tracks.
 
 
@@ -476,5 +476,5 @@ My main pitch finding was that the distribution of musical keys looks different 
 
 Interestingly, while the chroma plots often seemed to correspond to the timbre plots for the New Romantic playlist, this often wasn't the case for the trance tracks. While analyzing this further I learned about how the structures of pop songs differ from trance tracks. A typical pop song may consist of the following structure “Intro – Verse – Pre-Chorus – Chorus – Verse – Pre-Chorus – Chorus – Outro”, while the most common track structure for trance is : “Intro – Buildup – Breakdown – Build – Climax – Outro”. While pop songs generally maintain the same harmonies throughout the song, trance track sections can vary slightly in order to take the listener on a journey. This often means they will vary the levels of energy thoughout the song, which could lead to a difference in timbre.
 
-The external validity of my research may not be very high, as the amount of tracks in each playlist is quite low. Furthermore while these particular two genres might not be an immensly useful comparison, they are two of the genres I grew up to and i thoroughlyenjoyed listening to some of my nostalgic favourites and learning how effective and efficient R is for data visualisation at the same time. 
+The external validity of my research may not be very high, as the amount of tracks in each playlist is quite low. Furthermore while these particular two genres might not be an immensly useful comparison, they are two of the genres I grew up to and i thoroughly enjoyed listening to some of my nostalgic favourites and learning how effective and efficient R is for data visualisation at the same time. 
 This research could however be interesting to people who would like to do a simple comparison between two musical genres using the Spotify API, by giving them an overview of what is possible.  
